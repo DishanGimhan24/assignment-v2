@@ -1,7 +1,8 @@
 "use client";
 import styles from "./page.module.css";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Task, TaskStatus } from '../types';
+import { getTasks } from '../api/tasks';
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'TODO', label: 'To do' },
@@ -9,11 +10,29 @@ const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'DONE', label: 'Done' },
 ];
 
-export default function Home() {
+export default function TaskBoardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchInput, setSearchInput] = useState('');
   const [moveError, setMoveError] = useState<string | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  // 1. Fetch initial tasks
+  useEffect(() => {
+    getTasks().then((data) => {
+      setTasks(data);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <main className={styles.container}>
+        <h1 className={styles.heading}>Task Board</h1>
+        <p>Loading tasks...</p>
+      </main>
+    );
+  }
 
   const filteredTasks = tasks.filter((t) =>
     t.title.toLowerCase().includes(debouncedSearch)
