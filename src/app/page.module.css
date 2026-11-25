@@ -12,6 +12,12 @@
   margin-bottom: 16px;
 }
 
+/* Search Box */
+.searchSection {
+  margin-bottom: 24px;
+  max-width: 340px;
+}
+
 .label {
   display: block;
   font-size: 14px;
@@ -27,6 +33,80 @@
   border-radius: 6px;
   background: #ffffff;
 }
+
+/* Visible Focus Styles (Accessibility) */
+.input:focus-visible,
+.button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Error Banner */
+.errorBanner {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 3-Column Responsive Grid */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+/* Stack into 1 column below 768px */
+@media (max-width: 767px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.column {
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.columnHeader {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.columnCount {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Inline Add Task Form */
+.addForm {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 12px;
+}
+
+.addRow {
+  display: flex;
+  gap: 8px;
+}
+
+.fieldError {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
 /* Task Card */
 .cardList {
   display: flex;
@@ -41,47 +121,20 @@
   padding: 12px;
 }
 
-.cardDesc {
-  font-size: 13px;
-  color: #4b5563;
-  margin-bottom: 6px;
-}
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.columnHeader {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-
-.addForm {
-  background: #ffffff;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 12px;
-}
-
-.addRow {
+/* Task Card */
+.cardList {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.button {
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid #d1d5db;
-  border-radius: 5px;
-  background: #f9fafb;
-  cursor: pointer;
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
 }
+
 .cardTitle {
   font-size: 15px;
   font-weight: 600;
@@ -100,3 +153,27 @@
   margin-bottom: 10px;
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.button {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

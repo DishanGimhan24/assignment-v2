@@ -2,7 +2,7 @@
 import styles from "./page.module.css";
 import { useState,useEffect,FormEvent } from "react";
 import { Task, TaskStatus } from '../types';
-import { getTasks,createTask } from '../api/tasks';
+import { getTasks,createTask,updateTaskStatus } from '../api/tasks';
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'TODO', label: 'To do' },
@@ -69,6 +69,27 @@ export default function TaskBoardPage() {
     }
   }
 
+  // 4. Optimistic Move handler with rollback on error
+  async function handleMove(task: Task, nextStatus: TaskStatus) {
+    const previousStatus = task.status;
+    setMoveError(null);
+
+    // Move immediately in UI (Optimistic)
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t))
+    );
+
+    try {
+      await updateTaskStatus(task.id, nextStatus);
+    } catch (err) {
+      // Revert back on failure
+      setTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, status: previousStatus } : t))
+      );
+      setMoveError(err instanceof Error ? err.message : 'Could not move task');
+    }
+  }
+
   if (loading) {
     return (
       <main className={styles.container}>
@@ -84,8 +105,10 @@ export default function TaskBoardPage() {
   return (
     <main className={styles.container}>
       <h1 className={styles.heading}>Task Board</h1>
-      <div>
-        <label htmlFor="search-tasks">Search tasks</label>
+      <div className={styles.searchSection}>
+        <label htmlFor="search-tasks" className={styles.label}>
+          Search tasks
+        </label>
         <input
           id="search-tasks"
           type="text"
@@ -97,7 +120,7 @@ export default function TaskBoardPage() {
       </div>
       {/* Optimistic Move Error Banner */}
       {moveError && (
-        <div>
+        <div role="alert" className={styles.errorBanner}>
           <span>{moveError}</span>
           <button
             type="button"
@@ -148,7 +171,7 @@ export default function TaskBoardPage() {
                 </form>
               )}
               {/* Task Cards */}
-              <div className="styles.cardList"></div>
+              <div className={styles.cardList}>
               {columnTasks.map((task) => (
                 <article key={task.id} className={styles.card}>
                   <h3 className={styles.cardTitle}>{task.title}</h3>
@@ -158,9 +181,24 @@ export default function TaskBoardPage() {
                   {task.dueDate && (
                     <p className={styles.cardDate}>Due {task.dueDate}</p>
                   )}
-                </article>
 
-              ))}
+                    <div className={styles.actions}>
+                      {COLUMNS.filter((target) => target.status !== task.status).map(
+                        (target) => (
+                          <button
+                            key={target.status}
+                            type="button"
+                            className={styles.button}
+                            onClick={() => handleMove(task, target.status)}
+                          >
+                            Move to {target.label}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
             </section>
           );
         })}
