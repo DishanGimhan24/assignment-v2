@@ -1,8 +1,8 @@
 "use client";
 import styles from "./page.module.css";
-import { useState,useEffect } from "react";
+import { useState,useEffect,FormEvent } from "react";
 import { Task, TaskStatus } from '../types';
-import { getTasks } from '../api/tasks';
+import { getTasks,createTask } from '../api/tasks';
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'TODO', label: 'To do' },
@@ -16,6 +16,14 @@ export default function TaskBoardPage() {
   const [moveError, setMoveError] = useState<string | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  
+
+
+  // Inline Add Task Form
+  const [newTitle, setNewTitle] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  
 
   // 1. Fetch initial tasks
   useEffect(() => {
@@ -33,6 +41,33 @@ export default function TaskBoardPage() {
 
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  // 3. Add Task handler with validation
+  async function handleAddTask(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = newTitle.trim();
+
+    if (!trimmed) {
+      setFormError('Title is required');
+      return;
+    }
+    if (trimmed.length > 80) {
+      setFormError('Title must be 80 characters or fewer');
+      return;
+    }
+
+    setFormError(null);
+    setAdding(true);
+    try {
+      const created = await createTask({ title: trimmed });
+      setTasks((prev) => [created, ...prev]);
+      setNewTitle('');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Failed to create task');
+    } finally {
+      setAdding(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -84,6 +119,34 @@ export default function TaskBoardPage() {
                 {col.label}{' '}
                 <span className={styles.columnCount}>({columnTasks.length})</span>
               </h2>
+              {/* Inline Add Task Form inside "To do" column */}
+              {col.status === 'TODO' && (
+                <form onSubmit={handleAddTask} className={styles.addForm} noValidate>
+                  <label htmlFor="new-task-title" className={styles.label}>
+                    New task
+                  </label>
+                  <div className={styles.addRow}>
+                    <input
+                      id="new-task-title"
+                      type="text"
+                      className={styles.input}
+                      value={newTitle}
+                      onChange={(e) => {
+                        setNewTitle(e.target.value);
+                        if (formError) setFormError(null);
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      className={styles.button}
+                      disabled={adding}
+                    >
+                      {adding ? 'Adding...' : 'Add task'}
+                    </button>
+                  </div>
+                  {formError && <p className={styles.fieldError}>{formError}</p>}
+                </form>
+              )}
               {/* Task Cards */}
               <div className="styles.cardList"></div>
               {columnTasks.map((task) => (
