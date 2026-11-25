@@ -25,6 +25,15 @@ export default function TaskBoardPage() {
     });
   }, []);
 
+  // 2. Manual 300ms debounce for search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim().toLowerCase());
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   if (loading) {
     return (
       <main className={styles.container}>
@@ -46,6 +55,7 @@ export default function TaskBoardPage() {
           id="search-tasks"
           type="text"
           className={styles.input}
+          placeholder="Filter by title"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
         />
@@ -64,7 +74,7 @@ export default function TaskBoardPage() {
         </div>
       )}
       {/* 3 Columns */}
-      <div>
+      <div className={styles.board}>
         {COLUMNS.map((col) => {
           const columnTasks = filteredTasks.filter((t) => t.status === col.status);
 
